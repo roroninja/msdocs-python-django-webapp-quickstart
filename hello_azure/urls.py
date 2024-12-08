@@ -2,7 +2,7 @@ from django.urls import path,re_path,include
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
-app_name='nptufinder'
+app_name='hello_azure'
 urlpatterns = [
     path('',views.index,name='index'),
     path('add/',views.add,name='add'),
