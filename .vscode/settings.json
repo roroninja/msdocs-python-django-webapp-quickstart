@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/8a8961f6-9fe7-45f2-b095-bcb1e4739d2b/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/cloud-nptufinder",
+    "appService.deploySubpath": "."
+}

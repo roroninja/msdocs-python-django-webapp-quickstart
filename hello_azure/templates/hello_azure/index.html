@@ -1,32 +1,545 @@
-{% load static %}
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Hello Azure - Python Quickstart</title>
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-    <link rel="icon"href="{% static 'favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失物招領</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Rowdies:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body {
+            background-color: #f9f9f9;
+            font-family: 'Merriweather', serif;
+            margin: 0;
+            padding: 20px;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        nav img {
+            width: 150px;
+            height: auto;
+        }
+        .nav-link {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 22px;
+        }
+        .nav-link:hover {
+            background-color: #0056b3;
+        }
+        .card {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            transition: box-shadow 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .card-header {
+            background-color: #F2E3C6;
+            color: black;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .edit-btn, .claim-btn {
+            background-color: #a1b8d6;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .edit-btn:hover {
+            background-color: #4f8abd;
+        }
+        .claim-btn {
+            background-color: #f98160;
+        }
+        .claim-btn:hover {
+            background-color: #C96325;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input, select, textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+       .index{
+            width:72.66px;
+            height:56.25px;
+        }
+    </style>
 </head>
-<html>
-   <body>
-     <main>
-        <div class="px-4 py-3 my-2 text-center">
-            <img class="d-block mx-auto mb-4" src="{% static 'images/azure-icon.svg' %}" alt="Azure Logo" width="192" height="192"/>
-            <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
-            <h1 class="display-6 fw-bold text-primary">Welcome to Azure</h1>            
-          </div>
-        <form method="post" action="hello">
-            {% csrf_token %}
-            <div class="col-md-6 mx-auto text-center">
-                <label for="name" class="form-label fw-bold fs-5">Please tell me your name?</label>
-
-                <!-- <p class="lead mb-2">Could you please tell me your name?</p> -->
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center align-items-center my-1">
-                    <input type="text" class="form-control" id="name" name="name" style="max-width: 256px;">
-                  </div>            
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center my-2">
-                  <button type="submit" class="btn btn-primary btn-lg px-4 gap-3">Say Hello</button>
-                </div>            
+<body>
+    <div>
+        {% if only_items %}
+    <div class="row">
+        {% for item in found_items %}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">{{ item.item_name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>類別:</strong>
+                    {% if item.category == 'electronics' %} 電子產品
+                    {% elif item.category == 'personal' %} 個人用品
+                    {% elif item.category == 'clothing' %} 衣物
+                    {% elif item.category == 'card' %} 卡片
+                    {% elif item.category == 'other' %} 其他
+                    {% endif %}
+                    </p>
+                    <p class="card-text"><strong>拾獲日期:</strong> {{ item.date_found|date:"F j, Y" }}</p>
+                    <p class="card-text"><strong>細節:</strong> {{ item.details }}</p>
+                    <p class="card-text"><strong>拾獲地點:</strong> {{ item.location }}</p>
+                    <button class="edit-btn" data-id="{{ item.id }}">編輯</button>
+                    <button class="claim-btn" data-item-id="{{ item.id }}">招領</button>
+                </div>
             </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+        <nav>
+            <img src="/static/images/logo.png" class='index' alt="Index">
+            <button class="nav-link" id="newReportBtn">+</button>
+        </nav>
+
+        <!-- 隱藏的表單，嵌入 SweetAlert -->
+        <form id="reportForm" style="display: none;" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <br>
+            <select name="category" required>
+                <option value="electronics">電子產品</option>
+                <option value="personal">個人用品</option>
+                <option value="clothing">衣物</option>
+                <option value="card">卡片</option>
+                <option value="other">其他</option>
+            </select>
+            <input type="date" name="date" required>
+            <br>
+            <input type="text" name="item_name" placeholder="物品名稱" required>
+            <textarea name="detail" placeholder="細節"  rows="3" required></textarea>
+            <input type="text" name="location" placeholder="拾獲地點" required>
+            <input type="email" name="finder_email" placeholder="拾獲人電子郵件" required>
+            <input type="password" name="finder_pwd" placeholder="拾獲人密碼" required>
+            <input type="file" name="image" accept="image/*">
         </form>
-     </main>      
-   </body>
+        <div>
+            <label for="categoryFilter">Filter by Category:</label>
+            <select id="categoryFilter">
+                <option value="">All</option>
+                <option value="electronics">電子產品</option>
+                <option value="personal">個人用品</option>
+                <option value="clothing">衣物</option>
+                <option value="card">卡片</option>
+                <option value="other">其他</option>
+            </select>
+        </div>
+        
+        <div id="itemList">
+            <div class="row">
+                {% for item in found_items %}
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">{{ item.item_name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text"><strong>類別:</strong>
+                            {% if item.category == 'electronics' %} 電子產品
+                            {% elif item.category == 'personal' %} 個人用品
+                            {% elif item.category == 'clothing' %} 衣物
+                            {% elif item.category == 'card' %} 卡片
+                            {% elif item.category == 'other' %} 其他
+                            {% endif %}
+                            </p>
+                            <p class="card-text"><strong>拾獲日期:</strong> {{ item.date_found|date:"F j, Y" }}</p>
+                            <p class="card-text"><strong>細節:</strong> {{ item.details }}</p>
+                            <p class="card-text"><strong>拾獲地點:</strong> {{ item.location }}</p>
+                            <p class="card-text"><strong>圖片:</strong>
+                                <br>
+                                <img src="/media/{{ item.image }}" alt="Image of {{ item.image }}" style="max-width: 200px; max-height: 200px; width: auto; height: auto;">
+                            </p>
+                            <button class="edit-btn" data-id="{{ item.id }}">編輯</button>
+                            <button class="claim-btn" data-item-id="{{ item.id }}">招領</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}        
+                {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function getCookie(name) {
+            const cookies = document.cookie.split('; ');
+            for (let i = 0; i < cookies.length; i++) {
+                const [key, value] = cookies[i].split('=');
+                if (key === name) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        document.getElementById('categoryFilter').addEventListener('change', function() {
+            const category = this.value;
+            fetch("{% url 'nptufinder:filtered_items' %}?category=" + category)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('itemList').innerHTML = data.html;
+                });
+        });        
+        
+        document.getElementById('newReportBtn').addEventListener('click', function () {
+            Swal.fire({
+                title: 'Submit New Report',
+                html: document.getElementById('reportForm').innerHTML, // 將隱藏的表單嵌入 SweetAlert 彈窗
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                preConfirm: () => {
+                    // 在提交之前收集表單數據
+                    let formData = new FormData();
+                    formData.append('item_name', Swal.getPopup().querySelector('input[name="item_name"]').value);
+                    formData.append('category', Swal.getPopup().querySelector('select[name="category"]').value);
+                    formData.append('date', Swal.getPopup().querySelector('input[name="date"]').value);
+                    formData.append('detail', Swal.getPopup().querySelector('textarea[name="detail"]').value);
+                    formData.append('location', Swal.getPopup().querySelector('input[name="location"]').value);
+                    formData.append('finder_email', Swal.getPopup().querySelector('input[name="finder_email"]').value);
+                    formData.append('finder_pwd', Swal.getPopup().querySelector('input[name="finder_pwd"]').value);
+                    const imageInput = Swal.getPopup().querySelector('input[name="image"]');
+                    if (imageInput && imageInput.files.length > 0) {
+                        formData.append('image', imageInput.files[0]);
+                    }
+                    // 顯示 loading 動畫
+                    Swal.fire({
+                        title: 'Sending Report...',
+                        text: 'Please wait while we send the report.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    const csrfToken = getCookie('csrftoken'); // 动态获取 CSRF Token
+                    // 提交數據到後端
+                    return fetch("{% url 'nptufinder:add' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // 成功后的响应
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // 刷新页面以加载最新数据
+                            location.reload(); // 刷新页面
+                        });
+                    })
+                    .catch(error => {
+                        // 發生錯誤時的回應
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'An error occurred. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                }
+            });
+        });
+
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                let itemId = this.getAttribute('data-id'); // 获取拾获物品的 ID
+        
+                // 弹出 SweetAlert 表单
+                Swal.fire({
+                    title: '編輯資料登入',
+                    html: `
+                        <input type="email" id="email" class="swal2-input" placeholder="拾獲人電子郵件" required>
+                        <input type="password" id="password" class="swal2-input" placeholder="拾獲人密碼" required>
+                    `,
+                    confirmButtonText: 'Submit',
+                    showCancelButton: true,
+                    preConfirm: () => {
+                        let email = document.getElementById('email').value;
+                        let password = document.getElementById('password').value;
+        
+                        // 显示加载动画
+                        Swal.fire({
+                            title: 'Validating...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+        
+                        // 提交到后端进行验证
+                        return fetch("{% url 'nptufinder:edit_item' %}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                'id': itemId,  // 物品 ID
+                                'email': email,
+                                'password': password,
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // 弹出修改表单
+                                showEditForm(data.item, itemId);
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: data.message,
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'An error occurred. Please try again.',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                    }
+                });
+            });
+        });
+        
+        // 显示编辑表单的函数
+        function showEditForm(item, itemId) {
+            Swal.fire({
+                title: 'Update Item Details',
+                html: `
+                    <input type="text" id="item_name" class="swal2-input" placeholder="物品名稱" value="${item.item_name}" required>
+                    <select id="category" class="swal2-input" required>
+                        <option value="electronics" ${item.category === 'electronics' ? 'selected' : ''}>電子產品</option>
+                        <option value="personal" ${item.category === 'personal' ? 'selected' : ''}>個人用品</option>
+                        <option value="clothing" ${item.category === 'clothing' ? 'selected' : ''}>衣物</option>
+                        <option value="card" ${item.category === 'card' ? 'selected' : ''}>卡片</option>
+                        <option value="other" ${item.category === 'other' ? 'selected' : ''}>其他</option>
+                    </select>
+                    <input type="date" id="date_found" class="swal2-input" value="${item.date_found}" required>
+                    <textarea id="details" class="swal2-input" placeholder="細節" required>${item.details}</textarea>
+                    <input type="text" id="location" class="swal2-input" placeholder="拾獲地點" value="${item.location}" required>
+                    <button id="deleteButton" style="margin-top: 10px; background-color: red; color: white;">刪除</button>
+                `,
+                confirmButtonText: 'Update',
+                showCancelButton: true,
+                preConfirm: () => {
+                    return {
+                        'id': itemId,
+                        'item_name': document.getElementById('item_name').value,
+                        'category': document.getElementById('category').value,
+                        'date_found': document.getElementById('date_found').value,
+                        'details': document.getElementById('details').value,
+                        'location': document.getElementById('location').value,
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 发送更新请求到后端
+                    updateItem(result.value);
+                }
+            });
+        
+            // 处理删除按钮点击事件
+            const deleteButton = document.getElementById('deleteButton');
+            if (deleteButton) {
+                deleteButton.onclick = function() {
+                    deleteItem(itemId);
+                };
+            }
+        }
+
+        
+        // 更新物品的函数
+        function updateItem(data) {
+            fetch("{% url 'nptufinder:update_item' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '更新!',
+                        text: '物品資料以變更.',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // 刷新页面以加载最新数据
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '好像有些地方錯誤了，請稍後再試!',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+        function deleteItem(itemId) {
+            fetch(`/delete-item/${itemId}/`, { // 这里的 URL 路径需要包含 itemId
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '已刪除!',
+                        text: '資料已刪除',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // 刷新页面以加载最新数据
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '好像有些地方錯誤了，請稍後再試!',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+        document.querySelectorAll('.claim-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const itemId = this.getAttribute('data-item-id');
+                
+                Swal.fire({
+                    title: '輸入你的電子郵件以招領物品',
+                    input: 'email',
+                    inputLabel: '你的電子郵件',
+                    inputPlaceholder: '請輸入電子郵件',
+                    showCancelButton: true,
+                    confirmButtonText: '提交',
+                    preConfirm: (email) => {
+                        if (!email) {
+                            Swal.showValidationMessage('請輸入有效的電子郵件');
+                        }
+                        return email;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        claimItem(itemId, result.value);
+                    }
+                });
+            });
+        });
+        
+        function claimItem(itemId, email) {
+            fetch("{% url 'nptufinder:claim_item' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ item_id: itemId, email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '招領成功!',
+                        text: '你已成功招領該物品。',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '錯誤!',
+                        text: data.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: '錯誤!',
+                    text: '發生錯誤，請稍後再試。',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+    </script>
+</body>
 </html>
